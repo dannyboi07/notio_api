@@ -1,5 +1,7 @@
 -- THis is a schema for postgresql
 
+CREATE DATABASE notio;
+
 CREATE TABLE IF NOT EXISTS profile (
     id SERIAL PRIMARY KEY,
     first_name VARCHAR(255) NOT NULL,
