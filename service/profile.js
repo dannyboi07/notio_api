@@ -207,7 +207,6 @@ async function RefreshAccessToken(profileId) {
 }
 
 module.exports = {
-    GetProfileById,
     CreateProfile,
     LoginUser,
     RefreshAccessToken,

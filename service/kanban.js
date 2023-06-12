@@ -14,6 +14,32 @@ function getUserBoards(profileId) {
 }
 
 /**
+ * @param {CreateBoard} board
+ * @param {number | string} profileId
+ * @returns {KanbanBoard}
+ */
+async function CreateKanbanBoard(board, profileId) {
+    let createdBoard = null;
+    try {
+        [createdBoard] = await KanbanBoardModel()
+            .insert({
+                title: board.title,
+                description: board.description,
+                profile_id: profileId,
+            })
+            .returning("*");
+    } catch (error) {
+        console.log("Failed to create board in db, err:", error);
+        throw new HTTP500Error("Failed to create board");
+    }
+    if (!createdBoard) {
+        throw new HTTP500Error("Failed to create board");
+    }
+
+    return createdBoard;
+}
+
+/**
  * @param {number | string} profileId
  * @returns {KanbanBoard[]}
  */
@@ -32,6 +58,13 @@ async function GetAllUserBoards(profileId) {
     return boards;
 }
 
+/**
+ * @typedef {Object} CreateBoard
+ * @property {string} title
+ * @property {string} description
+ */
+
 module.exports = {
+    CreateKanbanBoard,
     GetAllUserBoards,
 };
