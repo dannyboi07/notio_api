@@ -41,25 +41,21 @@ function globalErrorHandler(err, req, res, next) {
     });
 }
 
-function authMiddleware(req, res, next) {
+async function authMiddleware(req, res, next) {
     const accessToken = req.cookies?.accessToken ?? "";
 
     let profile = null;
     try {
         const decodedAccessToken =
             ProfileService.verifyAccessToken(accessToken);
-        profile = ProfileService.getProfileById(decodedAccessToken.id);
+        profile = await ProfileService.GetProfileById(decodedAccessToken.id);
     } catch (err) {
         console.error(err);
 
         if (err.name === "TokenExpiredError") {
-            // return res.status(401).json({ error: "Session expired" });
             throw new HTTP401Error("Session expired");
         } else if (err.name === "JsonWebTokenError") {
             throw new HTTP401Error("Session expired");
-            // return res
-            //     .status(401)
-            //     .json({ error: "Malformed auth token, re-login" });
         }
     }
 
