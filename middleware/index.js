@@ -12,7 +12,7 @@ const joiValidationOptions = {
     stripUnknown: true,
 };
 
-function inputValidation(joiObject, ErrorResponse = HTTP400Error) {
+function InputValidation(joiObject, ErrorResponse = HTTP400Error) {
     return function (req, res, next) {
         const { error, value } = joiObject.validate(
             req.body,
@@ -30,7 +30,7 @@ function inputValidation(joiObject, ErrorResponse = HTTP400Error) {
     };
 }
 
-function globalErrorHandler(err, req, res, next) {
+function GlobalErrorHandler(err, req, res, next) {
     const statusCode = err?.statusCode ?? 500;
     const status = err?.status ?? "failed";
     const message = err?.message ?? "Internal Server Error";
@@ -41,13 +41,13 @@ function globalErrorHandler(err, req, res, next) {
     });
 }
 
-async function authMiddleware(req, res, next) {
+async function AuthMiddleware(req, res, next) {
     const accessToken = req.cookies?.accessToken ?? "";
 
     let profile = null;
     try {
         const decodedAccessToken =
-            ProfileService.verifyAccessToken(accessToken);
+            ProfileService.VerifyAccessToken(accessToken);
         profile = await ProfileService.GetProfileById(decodedAccessToken.id);
     } catch (err) {
         console.error(err);
@@ -67,4 +67,4 @@ async function authMiddleware(req, res, next) {
     next();
 }
 
-module.exports = { log, inputValidation, globalErrorHandler, authMiddleware };
+module.exports = { log, InputValidation, GlobalErrorHandler, AuthMiddleware };

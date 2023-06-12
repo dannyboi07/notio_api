@@ -7,6 +7,8 @@ const {
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require("../config");
+// Import breaking due to circular dependency, TODO: fix
+// const { mountUri: AuthMountUri } = require("../controller/auth");
 
 const getHashedPw = (password) => bcrypt.hash(password, config.PW_SALT_RND);
 const verifyPw = (password, hashedPw) => bcrypt.compare(password, hashedPw);
@@ -14,7 +16,7 @@ const verifyPw = (password, hashedPw) => bcrypt.compare(password, hashedPw);
 const ACCESS_TOKEN_EXPIRY = 60 * 60;
 const REFRESH_TOKEN_EXPIRY = 60 * 60 * 24 * 7;
 /**
- * @param {(number | string)} userId
+ * @param {number | string} userId
  * @param {string} userName
  * @returns {string}
  */
@@ -30,7 +32,7 @@ const createAccessTokenJwt = (userId, userName) =>
         },
     );
 /**
- * @param {(number | string)} userId
+ * @param {number | string} userId
  * @returns {string}
  */
 const createRefreshTokenJwt = (userId) =>
@@ -43,9 +45,33 @@ const createRefreshTokenJwt = (userId) =>
             expiresIn: REFRESH_TOKEN_EXPIRY, // 7 days
         },
     );
-const verifyAccessToken = (token) =>
+
+/**
+ * @param {number | string} userId
+ * @param {string} userName
+ * @returns {Token}
+ */
+const createAccessToken = (userId, userName) => ({
+    name: "accessToken",
+    token: createAccessTokenJwt(userId, userName),
+    expiresIn: ACCESS_TOKEN_EXPIRY,
+    path: config.BASE,
+});
+
+/**
+ * @param {number | string} userId
+ * @returns {Token}
+ */
+const createRefreshToken = (userId) => ({
+    name: "refreshToken",
+    token: createRefreshTokenJwt(userId),
+    expiresIn: REFRESH_TOKEN_EXPIRY,
+    path: `${config.BASE}/auth/refresh}`,
+});
+
+const VerifyAccessToken = (token) =>
     jwt.verify(token, config.ACCESS_TOKEN_SECRET);
-const verifyRefreshToken = (token) =>
+const VerifyRefreshToken = (token) =>
     jwt.verify(token, config.REFRESH_TOKEN_SECRET);
 
 /**
@@ -155,18 +181,8 @@ async function LoginUser(profileDetails) {
     const refreshToken = createRefreshTokenJwt(userProfile.id);
 
     return [
-        {
-            token: accessToken,
-            name: "accessToken",
-            path: config.BASE,
-            expiresIn: ACCESS_TOKEN_EXPIRY,
-        },
-        {
-            token: refreshToken,
-            name: "refreshToken",
-            path: `${config.BASE}/auth/refresh`,
-            expiresIn: REFRESH_TOKEN_EXPIRY,
-        },
+        createAccessToken(userProfile.id, userProfile.username),
+        createRefreshToken(userProfile.id),
     ];
 }
 
@@ -187,12 +203,7 @@ async function RefreshAccessToken(profileId) {
         throw new HTTP401Error("Unauthorized");
     }
 
-    return {
-        name: "accessToken",
-        token: createAccessTokenJwt(userProfile.id, userProfile.username),
-        path: config.BASE,
-        expiresIn: ACCESS_TOKEN_EXPIRY,
-    };
+    return createAccessToken(userProfile.id, userProfile.username);
 }
 
 module.exports = {
@@ -200,8 +211,8 @@ module.exports = {
     CreateProfile,
     LoginUser,
     RefreshAccessToken,
-    verifyAccessToken,
-    verifyRefreshToken,
+    VerifyAccessToken,
+    VerifyRefreshToken,
 };
 
 /**
