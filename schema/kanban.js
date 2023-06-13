@@ -6,7 +6,7 @@ const {
     getStringMaxLen,
 } = require("./messages");
 
-const createKanbanBoard = Joi.object({
+const CreateKanbanBoard = Joi.object({
     title: Joi.string()
         .min(3)
         .max(30)
@@ -33,7 +33,7 @@ const createKanbanBoard = Joi.object({
  * @param {KanbanBoard} kanbanBoard
  * @returns {KanbanBoard}
  */
-const getKanbanBoardResponse = (kanbanBoard) => ({
+const GetKanbanBoardResponse = (kanbanBoard) => ({
     id: kanbanBoard.id,
     title: kanbanBoard.title,
     description: kanbanBoard.description,
@@ -47,19 +47,19 @@ const getKanbanBoardResponse = (kanbanBoard) => ({
  * @param {KanbanBoard} createdKanban
  * @returns {KanbanBoard}
  */
-const getCreateKanbanResponse = (createdKanban) =>
-    getKanbanBoardResponse(createdKanban);
+const GetCreateKanbanResponse = (createdKanban) =>
+    GetKanbanBoardResponse(createdKanban);
 
 /**
  * @param {KanbanBoard[]} kanbanBoards
  * @returns {KanbanBoard[]}
  */
-const getManyKanbanBoardsResponse = (kanbanBoards) =>
-    kanbanBoards.map((kanbanBoard) => getKanbanBoardResponse(kanbanBoard));
+const GetManyKanbanBoardsResponse = (kanbanBoards) =>
+    kanbanBoards.map((kanbanBoard) => GetKanbanBoardResponse(kanbanBoard));
 
 module.exports = {
-    createKanbanBoard,
-    getCreateKanbanResponse,
-    getKanbanBoardResponse,
-    getManyKanbanBoardsResponse,
+    CreateKanbanBoard,
+    GetCreateKanbanResponse,
+    GetKanbanBoardResponse,
+    GetManyKanbanBoardsResponse,
 };

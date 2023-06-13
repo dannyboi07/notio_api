@@ -4,19 +4,19 @@ const mountUri = "/auth";
 const ProfileService = require("../service/profile");
 const { InputValidation, AuthMiddleware } = require("../middleware");
 const {
-    createProfile,
-    getCreateProfileResponse,
-    loginRequest,
+    CreateProfile,
+    GetCreateProfileResponse,
+    LoginRequest,
     GetMyProfileResponse,
 } = require("../schema/profile");
 
-router.post("/register", InputValidation(createProfile), async (req, res) => {
+router.post("/register", InputValidation(CreateProfile), async (req, res) => {
     try {
         const createdProfile = await ProfileService.CreateProfile(req.body);
         return res.json({
             status: "success",
             message: "Your account has been created successfully",
-            data: getCreateProfileResponse(createdProfile),
+            data: GetCreateProfileResponse(createdProfile),
         });
     } catch (error) {
         return res.status(error.statusCode).json({
@@ -26,7 +26,7 @@ router.post("/register", InputValidation(createProfile), async (req, res) => {
     }
 });
 
-router.post("/login", InputValidation(loginRequest), async (req, res) => {
+router.post("/login", InputValidation(LoginRequest), async (req, res) => {
     try {
         const { tokens: cookieTokens, profile } =
             await ProfileService.LoginUser(req.body);
