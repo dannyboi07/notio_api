@@ -7,7 +7,7 @@ const {
     getStringRequired,
 } = require("./messages");
 
-const createProfile = Joi.object({
+const CreateProfile = Joi.object({
     username: Joi.string()
         .alphanum()
         .min(3)
@@ -56,7 +56,7 @@ const createProfile = Joi.object({
  * @param {Profile} createdProfile
  * @returns {Profile}
  */
-const getCreateProfileResponse = (createdProfile) => ({
+const GetCreateProfileResponse = (createdProfile) => ({
     id: createdProfile.id,
     username: createdProfile.username,
     email: createdProfile.email,
@@ -64,7 +64,7 @@ const getCreateProfileResponse = (createdProfile) => ({
     last_name: createdProfile.last_name,
 });
 
-const loginRequest = Joi.object({
+const LoginRequest = Joi.object({
     username: Joi.string()
         .alphanum()
         .min(3)
@@ -87,8 +87,21 @@ const loginRequest = Joi.object({
         }),
 });
 
+/**
+ * @param {Profile} profile
+ * @returns {Profile}
+ */
+const GetMyProfileResponse = (profile) => ({
+    id: profile.id,
+    username: profile.username,
+    email: profile.email,
+    first_name: profile.first_name,
+    last_name: profile.last_name,
+});
+
 module.exports = {
-    createProfile,
-    getCreateProfileResponse,
-    loginRequest,
+    CreateProfile,
+    GetCreateProfileResponse,
+    LoginRequest,
+    GetMyProfileResponse,
 };

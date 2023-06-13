@@ -154,8 +154,11 @@ async function CreateProfile(profileDetails) {
 }
 
 /**
+ * @typedef {Object} LoginUserReturn
+ * @property {Array<Token>} tokens
+ * @property {Profile} profile
  * @param {LoginUser} profileDetails
- * @returns {Array<Token>} Return[0] is the access token, Return[1] is the refresh token
+ * @returns {LoginUserReturn} Return[0] is the access token, Return[1] is the refresh token
  */
 async function LoginUser(profileDetails) {
     let userProfile = null;
@@ -174,16 +177,13 @@ async function LoginUser(profileDetails) {
         throw new HTTP401Error("Incorrect password");
     }
 
-    const accessToken = createAccessTokenJwt(
-        userProfile.id,
-        userProfile.username,
-    );
-    const refreshToken = createRefreshTokenJwt(userProfile.id);
-
-    return [
-        createAccessToken(userProfile.id, userProfile.username),
-        createRefreshToken(userProfile.id),
-    ];
+    return {
+        profile: userProfile,
+        tokens: [
+            createAccessToken(userProfile.id, userProfile.username),
+            createRefreshToken(userProfile.id),
+        ],
+    };
 }
 
 /**

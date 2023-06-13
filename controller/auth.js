@@ -7,12 +7,17 @@ const {
     createProfile,
     getCreateProfileResponse,
     loginRequest,
+    GetMyProfileResponse,
 } = require("../schema/profile");
 
 router.post("/register", InputValidation(createProfile), async (req, res) => {
     try {
         const createdProfile = await ProfileService.CreateProfile(req.body);
-        return res.json(getCreateProfileResponse(createdProfile));
+        return res.json({
+            status: "success",
+            message: "Your account has been created successfully",
+            data: getCreateProfileResponse(createdProfile),
+        });
     } catch (error) {
         return res.status(error.statusCode).json({
             status: error.status,
@@ -23,7 +28,8 @@ router.post("/register", InputValidation(createProfile), async (req, res) => {
 
 router.post("/login", InputValidation(loginRequest), async (req, res) => {
     try {
-        const cookieTokens = await ProfileService.LoginUser(req.body);
+        const { tokens: cookieTokens, profile } =
+            await ProfileService.LoginUser(req.body);
         for (const token of cookieTokens) {
             res.cookie(token.name, token.token, {
                 maxAge: token.expiresIn * 1000,
@@ -34,6 +40,7 @@ router.post("/login", InputValidation(loginRequest), async (req, res) => {
         res.status(200).json({
             status: "success",
             message: "Logged in",
+            data: GetMyProfileResponse(profile),
         });
     } catch (error) {
         return res.status(error.statusCode).json({
@@ -57,14 +64,25 @@ router.get("/refresh", AuthMiddleware, async (req, res) => {
             status: "success",
         });
     } catch (error) {
-        console.log(error);
-        return res.json({
-            err: error,
+        return res.status(error.statusCode).json({
+            status: error.status,
+            message: error.message,
         });
-        // return res.status(error.statusCode).json({
-        //     status: error.status,
-        //     message: error.message,
-        // });
+    }
+});
+
+router.get("/me", AuthMiddleware, async (req, res) => {
+    try {
+        const profile = req.userDetails;
+        res.status(200).json({
+            status: "success",
+            data: GetMyProfileResponse(profile),
+        });
+    } catch (error) {
+        return res.status(error.statusCode).json({
+            status: error.status,
+            message: error.message,
+        });
     }
 });
 
