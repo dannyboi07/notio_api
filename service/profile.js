@@ -212,6 +212,7 @@ module.exports = {
     RefreshAccessToken,
     VerifyAccessToken,
     VerifyRefreshToken,
+    GetProfileById,
 };
 
 /**
