@@ -1,12 +1,21 @@
 const express = require("express");
 const app = express();
+require("express-async-errors");
 const config = require("./config");
+const cors = require("cors");
 const middleware = require("./middleware");
 const cookieParser = require("cookie-parser");
 
 const healthController = require("./controller/health");
 const authController = require("./controller/auth");
 const kanbanController = require("./controller/kanban");
+
+app.use(
+    cors({
+        origin: "http://localhost:3000",
+        credentials: true,
+    }),
+);
 
 app.use(express.json());
 app.use(middleware.log);
