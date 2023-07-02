@@ -50,7 +50,31 @@ router.post("/login", InputValidation(LoginRequest), async (req, res) => {
     }
 });
 
-router.get("/refresh", AuthMiddleware, async (req, res) => {
+router.get("/logout", AuthMiddleware, async (req, res) => {
+    try {
+        const tokensToDelete = await ProfileService.LogoutUser(
+            req.userDetails.id,
+        );
+        for (const token of tokensToDelete) {
+            [
+                res.clearCookie(token.name, {
+                    path: token.path,
+                }),
+            ];
+		}
+        res.status(200).json({
+            status: "success",
+            message: "Logged out",
+        });
+    } catch (error) {
+        return res.status(error.statusCode).json({
+            status: error.status,
+            message: error.message,
+        });
+    }
+});
+
+router.get("/refresh", async (req, res) => {
     try {
         const accessToken = await ProfileService.RefreshAccessToken(
             req.userDetails.id,

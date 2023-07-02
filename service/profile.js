@@ -187,6 +187,28 @@ async function LoginUser(profileDetails) {
 }
 
 /**
+ * Method returns an array of dummy tokens, to pass the cookie token details to be deleted
+ * @param {number | string} profileId
+ * @returns {Array<Token>}
+ */
+async function LogoutUser(profileId) {
+    return [
+        {
+            name: "accessToken",
+            token: "",
+            expiresIn: 0,
+            path: config.BASE,
+        },
+        {
+            name: "refreshToken",
+            token: "",
+            expiresIn: 0,
+            path: `${config.BASE}/auth/refresh}`,
+        },
+    ];
+}
+
+/**
  *
  * @param {(number | string)} profileId
  * @returns {Token}
@@ -213,6 +235,7 @@ module.exports = {
     VerifyAccessToken,
     VerifyRefreshToken,
     GetProfileById,
+    LogoutUser,
 };
 
 /**
