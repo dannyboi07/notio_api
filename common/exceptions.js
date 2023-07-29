@@ -34,9 +34,19 @@ class HTTP400Error extends Error {
     }
 }
 
+class HTTP404Error extends Error {
+	constructor(message = "Not found", ...args) {
+		super(message, ...args);
+		this.statusCode = 404;
+		this.status = "failed";
+		this.message = message;
+	}
+}
+
 module.exports = {
     HTTP500Error,
     HTTP400Error,
     HTTP401Error,
     HTTP403Error,
+	HTTP404Error,
 };
