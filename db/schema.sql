@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS kanban_column (
 	position INTEGER NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	FOREIGN KEY (board_id) REFERENCES kanban_board(id)
+	FOREIGN KEY (board_id) REFERENCES kanban_board(id),
+	UNIQUE (board_id, position)
 );
 
 CREATE TABLE IF NOT EXISTS kanban_card (
@@ -47,5 +48,6 @@ CREATE TABLE IF NOT EXISTS kanban_card (
 	position INTEGER NOT NULL,
 	created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	FOREIGN KEY (column_id) REFERENCES kanban_column(id)
+	FOREIGN KEY (column_id) REFERENCES kanban_column(id),
+	UNIQUE (column_id, position)
 );
