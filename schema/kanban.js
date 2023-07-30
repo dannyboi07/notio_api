@@ -107,6 +107,56 @@ const GetKanbanBoardColumnResponse = (kanbanBoardColumn) => ({
 const GetCreateKanbanBoardColumnResponse = (createdKanbanBoardColumn) =>
     GetKanbanBoardColumnResponse(createdKanbanBoardColumn);
 
+const CreateKanbanCard = Joi.object({
+    title: Joi.string()
+        .min(3)
+        .max(30)
+        .required()
+        .messages({
+            "any.required": getStringRequired("Title"),
+            "string.empty": getStringEmpty("Title"),
+            "string.min": getStringMinLen("Title"),
+            "string.max": getStringMaxLen("Title"),
+        }),
+    description: Joi.string()
+        .min(3)
+        .max(50)
+        .required()
+        .messages({
+            "any.required": getStringRequired("Description"),
+            "string.empty": getStringEmpty("Description"),
+            "string.min": getStringMinLen("Description"),
+            "string.max": getStringMaxLen("Description"),
+        }),
+    position: Joi.number()
+        .required()
+        .messages({
+            "any.required": getStringRequired("Position"),
+            "number.base": getStringRequired("Position"),
+        }),
+});
+
+/**
+ * @param {KanbanCard} kanbanCard
+ * @returns {KanbanCard}
+ */
+const GetKanbanCardResponse = (kanbanCard) => ({
+    id: kanbanCard.id,
+    column_id: kanbanCard.column_id,
+    title: kanbanCard.title,
+    description: kanbanCard.description,
+    position: kanbanCard.position,
+    created_at: kanbanCard.created_at,
+    updated_at: kanbanCard.updated_at,
+});
+
+/**
+ * @param {KanbanCard} createdKanbanCard
+ * @returns {KanbanCard}
+ */
+const GetCreateKanbanCardResponse = (createdKanbanCard) =>
+    GetKanbanCardResponse(createdKanbanCard);
+
 module.exports = {
     CreateKanbanBoard,
     GetCreateKanbanResponse,
@@ -115,4 +165,7 @@ module.exports = {
     CreateKanbanBoardColumn,
     GetKanbanBoardColumnResponse,
     GetCreateKanbanBoardColumnResponse,
+    CreateKanbanCard,
+    GetKanbanCardResponse,
+    GetCreateKanbanCardResponse,
 };

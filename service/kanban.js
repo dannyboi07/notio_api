@@ -7,6 +7,7 @@ const {
     HTTP500Error,
     HTTP404Error,
     HTTP400Error,
+    HTTP401Error,
 } = require("../common/exceptions");
 
 /**
@@ -120,6 +121,63 @@ async function CreateKanbanBoardColumn(column, profileId) {
 }
 
 /**
+ * @param {CreateBoardCard} card
+ * @param {number | string} profileId
+ * @returns {KanbanCard}
+ */
+async function CreateKanbanBoardCard(card, profileId) {
+    let boardExists = null;
+    try {
+        boardExists = (await KanbanBoardModel()
+            .join(
+                "kanban_column",
+                "kanban_board.id",
+                "=",
+                "kanban_column.board_id",
+            )
+            .where({
+                "kanban_board.profile_id": profileId,
+                "kanban_column.id": card.column_id,
+            })
+            .first())
+            ? true
+            : false;
+    } catch (error) {
+        console.log("Failed to get board from db, err:", error);
+        throw new HTTP500Error("Failed to create card");
+    }
+
+    if (!boardExists) {
+        throw new HTTP401Error("Unauthorized");
+    }
+
+    let createdCard = null;
+    try {
+        [createdCard] = await KanbanCardModel()
+            .insert({
+                column_id: card.column_id,
+                title: card.title,
+                description: card.description,
+                position: card.position,
+            })
+            .returning("*");
+    } catch (error) {
+        console.log("Failed to create card in db, err:", error);
+
+        // catch unique error thrown by postgres knex, when card position is already taken
+        if (error.code === "23505") {
+            throw new HTTP400Error("Card position already taken");
+        }
+        throw new HTTP500Error("Failed to create card");
+    }
+    if (!createdCard) {
+        throw new HTTP500Error("Failed to create card");
+    }
+
+    return createdCard;
+}
+
+/**
  * @typedef {Object} CreateBoard
  * @property {string} title
  * @property {string} description
@@ -133,8 +191,31 @@ async function CreateKanbanBoardColumn(column, profileId) {
  * @property {number} position
  */
 
+/**
+ * @typedef {Object} CreateBoardCard
+ * @property {number} column_id
+ * @property {string} title
+ * @property {string} description
+ * @property {number} position
+ */
+
+// * @property {number} priority
+// * @property {number} points
+// * @property {number} assignee_id
+// * @property {number} reporter_id
+// * @property {Date} due_date
+// * @property {Date} start_date
+// * @property {Date} end_date
+// * @property {string} color
+// * @property {string} tags
+// * @property {string} attachments
+// * @property {string} comments
+// * @property {string} checklist
+// * @property {string} checklist_items
+
 module.exports = {
     CreateKanbanBoard,
     GetAllUserBoards,
     CreateKanbanBoardColumn,
+    CreateKanbanBoardCard,
 };
