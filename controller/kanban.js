@@ -52,14 +52,14 @@ router.post(
 );
 
 router.post(
-    "/:id/column",
+    "/:boardId/column",
     AuthMiddleware,
     InputValidation(CreateKanbanBoardColumn),
     async (req, res) => {
         try {
             let boardId = null;
             try {
-                boardId = parseInt(req.params.id, 10);
+                boardId = parseInt(req.params.boardId, 10);
             } catch (error) {
                 throw new HTTP400Error("Invalid board id");
             }
@@ -67,7 +67,7 @@ router.post(
             const createdColumn = await KanbanService.CreateKanbanBoardColumn(
                 {
                     ...req.body,
-                    board_id: req.params.id,
+                    board_id: boardId,
                 },
                 req.userDetails.id,
             );
