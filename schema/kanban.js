@@ -33,12 +33,20 @@ const CreateKanbanBoard = Joi.object({
  * @param {KanbanBoard} kanbanBoard
  * @returns {KanbanBoard}
  */
-const GetKanbanBoardResponse = (kanbanBoard) => ({
+const GetKanbanBoardWithoutColumnResponse = (kanbanBoard) => ({
     id: kanbanBoard.id,
     title: kanbanBoard.title,
     description: kanbanBoard.description,
     created_at: kanbanBoard.created_at,
     updated_at: kanbanBoard.updated_at,
+});
+
+/**
+ * @param {KanbanBoard} kanbanBoard
+ * @returns {KanbanBoard}
+ */
+const GetKanbanBoardResponse = (kanbanBoard) => ({
+    ...GetKanbanBoardWithoutColumnResponse(kanbanBoard),
     // TODO: Replace with column parser
     columns: kanbanBoard.columns || [],
 });
@@ -157,9 +165,33 @@ const GetKanbanCardResponse = (kanbanCard) => ({
 const GetCreateKanbanCardResponse = (createdKanbanCard) =>
     GetKanbanCardResponse(createdKanbanCard);
 
+const UpdateKanbanBoard = Joi.object({
+    title: Joi.string()
+        .min(3)
+        .max(30)
+        .required()
+        .messages({
+            "any.required": getStringRequired("Title"),
+            "string.empty": getStringEmpty("Title"),
+            "string.min": getStringMinLen("Title"),
+            "string.max": getStringMaxLen("Title"),
+        }),
+    description: Joi.string()
+        .min(3)
+        .max(50)
+        .required()
+        .messages({
+            "any.required": getStringRequired("Description"),
+            "string.empty": getStringEmpty("Description"),
+            "string.min": getStringMinLen("Description"),
+            "string.max": getStringMaxLen("Description"),
+        }),
+});
+
 module.exports = {
     CreateKanbanBoard,
     GetCreateKanbanResponse,
+    GetKanbanBoardWithoutColumnResponse,
     GetKanbanBoardResponse,
     GetManyKanbanBoardsResponse,
     CreateKanbanBoardColumn,
@@ -168,4 +200,5 @@ module.exports = {
     CreateKanbanCard,
     GetKanbanCardResponse,
     GetCreateKanbanCardResponse,
+    UpdateKanbanBoard,
 };

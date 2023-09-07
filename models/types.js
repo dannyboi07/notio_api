@@ -41,3 +41,26 @@
  * @property {Date} created_at
  * @property {Date} updated_at
  */
+
+/**
+ * @typedef {Object} KanbanColumnWithCards
+ * @property {number} id
+ * @property {number} board_id
+ * @property {string} title
+ * @property {string} description
+ * @property {number} position
+ * @property {Date} created_at
+ * @property {Date} updated_at
+ * @property {KanbanCard[]} cards
+ */
+
+/**
+ * @typedef {Object} KanbanBoardWithColumnsAndCards
+ * @property {number} id
+ * @property {number} profile_id
+ * @property {string} title
+ * @property {string} description
+ * @property {Date} created_at
+ * @property {Date} updated_at
+ * @property {KanbanColumnWithCards[]} columns
+ */

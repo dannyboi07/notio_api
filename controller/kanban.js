@@ -11,6 +11,8 @@ const {
     GetCreateKanbanBoardColumnResponse,
     CreateKanbanCard,
     GetCreateKanbanCardResponse,
+    UpdateKanbanBoard,
+    GetKanbanBoardWithoutColumnResponse,
 } = require("../schema/kanban");
 const { HTTP400Error } = require("../common/exceptions");
 
@@ -118,6 +120,66 @@ router.post(
                 status: "success",
                 message: "Kanban board card created successfully",
                 data: GetCreateKanbanCardResponse(createdCard ?? {}),
+            });
+        } catch (error) {
+            return res.status(error.statusCode).json({
+                status: error.status,
+                message: error.message,
+            });
+        }
+    },
+);
+
+router.get("/:boardId", AuthMiddleware, async (req, res) => {
+    try {
+        let boardId = null;
+        try {
+            boardId = parseInt(req.params.boardId, 10);
+        } catch (error) {
+            throw new HTTP400Error("Invalid board id");
+        }
+
+        const board = await KanbanService.GetKanbanBoardWithColumnsAndCards(
+            boardId,
+            req.userDetails.id,
+        );
+        return res.json({
+            status: "success",
+            // data: GetCreateKanbanResponse(board),
+            data: board,
+        });
+    } catch (error) {
+        return res.status(error.statusCode).json({
+            status: error.status,
+            message: error.message,
+        });
+    }
+});
+
+router.put(
+    "/:boardId",
+    AuthMiddleware,
+    InputValidation(UpdateKanbanBoard),
+    async (req, res) => {
+        try {
+            let boardId = null;
+            try {
+                boardId = parseInt(req.params.boardId, 10);
+            } catch (error) {
+                throw new HTTP400Error("Invalid board id");
+            }
+
+            const updatedBoard = await KanbanService.UpdateKanbanBoard(
+                {
+                    id: boardId,
+                    ...req.body,
+                },
+                req.userDetails.id,
+            );
+            return res.json({
+                status: "success",
+                message: "Kanban board updated successfully",
+                data: GetKanbanBoardWithoutColumnResponse(updatedBoard),
             });
         } catch (error) {
             return res.status(error.statusCode).json({

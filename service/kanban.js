@@ -1,3 +1,4 @@
+const db = require("../db");
 const {
     KanbanBoardModel,
     KanbanColumnModel,
@@ -28,6 +29,123 @@ function getKanbanBoardByIdShallow(boardId, profileId) {
     return KanbanBoardModel()
         .where({ id: boardId, profile_id: profileId })
         .first();
+}
+
+/**
+ * @typedef {Object} KanbanBoardWithColumnsAndCardsRaw
+ * @property {number} board_id
+ * @property {number} board_profile_id
+ * @property {string} board_title
+ * @property {string} board_description
+ * @property {Date} board_created_at
+ * @property {Date} board_updated_at
+ * @property {number} column_id
+ * @property {number} column_board_id
+ * @property {string} column_title
+ * @property {string} column_description
+ * @property {number} column_position
+ * @property {Date} column_created_at
+ * @property {Date} column_updated_at
+ * @property {number} card_id
+ * @property {number} card_column_id
+ * @property {string} card_title
+ * @property {string} card_description
+ * @property {number} card_position
+ * @property {Date} card_created_at
+ * @property {Date} card_updated_at
+ * @param {number | string} boardId
+ * @param {number | string} profileId
+ * @returns {KanbanBoardWithColumnsAndCardsRaw[]}
+ */
+function getKanbanBoardById(boardId, profileId) {
+    return db
+        .raw(
+            `SELECT
+			kanban_board.id AS board_id,
+			kanban_board.profile_id AS board_profile_id,
+			kanban_board.title AS board_title,
+			kanban_board.description AS board_description,
+			kanban_board.created_at AS board_created_at,
+			kanban_board.updated_at AS board_updated_at,
+			kanban_column.id AS column_id,
+			kanban_column.board_id AS column_board_id,
+			kanban_column.title AS column_title,
+			kanban_column.description AS column_description,
+			kanban_column.position AS column_position,
+			kanban_column.created_at AS column_created_at,
+			kanban_column.updated_at AS column_updated_at,
+			kanban_card.id AS card_id,
+			kanban_card.column_id AS card_column_id,
+			kanban_card.title AS card_title,
+			kanban_card.description AS card_description,
+			kanban_card.position AS card_position,
+			kanban_card.created_at AS card_created_at,
+			kanban_card.updated_at AS card_updated_at
+			FROM kanban_board
+			JOIN kanban_column ON kanban_board.id = kanban_column.board_id
+			LEFT JOIN kanban_card ON kanban_column.id = kanban_card.column_id
+			WHERE kanban_board.id = ${boardId}
+			AND kanban_board.profile_id = ${profileId}
+			GROUP BY kanban_board.id, kanban_column.id, kanban_card.id
+			ORDER BY kanban_column.position ASC, kanban_card.position ASC;`,
+        )
+        .then((res) => {
+            return res?.rows ?? [];
+        });
+}
+
+/**
+ * @param {KanbanBoardWithColumnsAndCardsRaw[]} board
+ * @returns {KanbanBoardWithColumnsAndCards | null}
+ */
+function parseKanbanBoardWithColumnsAndCards(board) {
+    if (!board || !board.length) {
+        return null;
+    }
+
+    const columnCards = board.reduce((acc, curr) => {
+        const card = {
+            id: curr.card_id,
+            column_id: curr.card_column_id,
+            title: curr.card_title,
+            description: curr.card_description,
+            position: curr.card_position,
+            created_at: curr.card_created_at,
+            updated_at: curr.card_updated_at,
+        };
+
+        if (acc[curr.column_id]) {
+            if (!card.id) {
+                return acc;
+            }
+            acc[curr.column_id].cards.push(card);
+        } else {
+            acc[curr.column_id] = {
+                id: curr.column_id,
+                board_id: curr.column_board_id,
+                title: curr.column_title,
+                description: curr.column_description,
+                position: curr.column_position,
+                created_at: curr.column_created_at,
+                updated_at: curr.column_updated_at,
+                cards: card.id ? [card] : [],
+            };
+        }
+
+        return acc;
+    }, {});
+
+    const parsedBoard = {
+        id: board[0].board_id,
+        profile_id: board[0].board_profile_id,
+        title: board[0].board_title,
+        description: board[0].board_description,
+        created_at: board[0].board_created_at,
+        updated_at: board[0].board_updated_at,
+        columns: Object.values(columnCards),
+    };
+
+    return parsedBoard;
 }
 
 /**
@@ -177,6 +295,47 @@ async function CreateKanbanBoardCard(card, profileId) {
     return createdCard;
 }
 
+async function GetKanbanBoardWithColumnsAndCards(boardId, profileId) {
+    let board = null;
+    try {
+        board = await getKanbanBoardById(boardId, profileId);
+    } catch (error) {
+        console.log("Failed to get board from db, err:", error);
+        throw new HTTP500Error("Failed to fetch board");
+    }
+    if (!board) {
+        throw new HTTP500Error("Failed to fetch board");
+    }
+
+    return parseKanbanBoardWithColumnsAndCards(board);
+}
+
+/**
+ * @param {UpdateBoard} board
+ * @param {number | string} profileId
+ * @returns {KanbanBoard}
+ */
+async function UpdateKanbanBoard(board, profileId) {
+    let updatedBoard = null;
+    try {
+        [updatedBoard] = await KanbanBoardModel()
+            .where({ id: board.id, profile_id: profileId })
+            .update({
+                title: board.title,
+                description: board.description,
+            })
+            .returning("*");
+    } catch (error) {
+        console.log("Failed to update board in db, err:", error);
+        throw new HTTP500Error("Failed to update board");
+    }
+    if (!updatedBoard) {
+        throw new HTTP500Error("Failed to update board");
+    }
+
+    return updatedBoard;
+}
+
 /**
  * @typedef {Object} CreateBoard
  * @property {string} title
@@ -199,6 +358,13 @@ async function CreateKanbanBoardCard(card, profileId) {
  * @property {number} position
  */
 
+/**
+ * @typedef {Object} UpdateBoard
+ * @property {number} id
+ * @property {string} title
+ * @property {string} description
+ */
+
 // * @property {number} priority
 // * @property {number} points
 // * @property {number} assignee_id
@@ -218,4 +384,6 @@ module.exports = {
     GetAllUserBoards,
     CreateKanbanBoardColumn,
     CreateKanbanBoardCard,
+    GetKanbanBoardWithColumnsAndCards,
+    UpdateKanbanBoard,
 };
