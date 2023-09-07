@@ -1,5 +1,9 @@
+const { Knex } = require("knex");
 const config = require("../config");
 
+/**
+ * @type {Knex}
+ */
 const db = require("knex")({
     client: "pg",
     version: "15.3",
