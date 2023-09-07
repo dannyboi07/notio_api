@@ -61,7 +61,7 @@ router.get("/logout", AuthMiddleware, async (req, res) => {
                     path: token.path,
                 }),
             ];
-		}
+        }
         res.status(200).json({
             status: "success",
             message: "Logged out",
@@ -76,9 +76,13 @@ router.get("/logout", AuthMiddleware, async (req, res) => {
 
 router.get("/refresh", async (req, res) => {
     try {
+        const refreshToken = req.cookies?.refreshToken ?? "";
+        const decodedRefreshToken =
+            ProfileService.VerifyRefreshToken(refreshToken);
         const accessToken = await ProfileService.RefreshAccessToken(
-            req.userDetails.id,
+            decodedRefreshToken.id,
         );
+
         res.cookie(accessToken.name, accessToken.token, {
             maxAge: accessToken.expiresIn * 1000,
             path: accessToken.path,
