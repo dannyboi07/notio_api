@@ -188,6 +188,23 @@ const UpdateKanbanBoard = Joi.object({
         }),
 });
 
+const ReorderColumnsRequest = Joi.object({
+    columns: Joi.array()
+        .items(
+            Joi.number()
+                .required()
+                .messages({
+                    "any.required": getStringRequired("Column id"),
+                    "number.base": getStringRequired("Column id"),
+                }),
+        )
+        .required()
+        .messages({
+            "any.required": getStringRequired("Columns"),
+            "array.base": getStringRequired("Columns"),
+        }),
+});
+
 module.exports = {
     CreateKanbanBoard,
     GetCreateKanbanResponse,
@@ -201,4 +218,5 @@ module.exports = {
     GetKanbanCardResponse,
     GetCreateKanbanCardResponse,
     UpdateKanbanBoard,
+	ReorderColumnsRequest,
 };

@@ -337,6 +337,91 @@ async function UpdateKanbanBoard(board, profileId) {
 }
 
 /**
+ *
+ * @param {number | string} boardId
+ * @param {Array<number | string>} columnIds
+ * @param {number | string} profileId
+ * @returns {KanbanColumn[]}
+ */
+async function ReorderBoardColumns(boardId, columnIds, profileId) {
+    // let boardExists = null;
+    // try {
+    // 	boardExists = (await KanbanBoardModel()
+    // 		.where({ id: boardId, profile_id: profileId })
+    // 		.first())
+    // 		? true
+    // 		: false;
+    // } catch (error) {
+    // 	console.log("Failed to get board from db, err:", error);
+    // 	throw new HTTP500Error("Failed to reorder columns");
+    // }
+
+    // if (!boardExists) {
+    // 	throw new HTTP401Error("Unauthorized");
+    // }
+
+    let columnCount = 0;
+    try {
+        columnCount = await KanbanColumnModel()
+            .select("id")
+            .join(
+                "kanban_board",
+                "kanban_column.board_id",
+                "=",
+                "kanban_board.id",
+            )
+            .where({
+                "kanban_board.profile_id": profileId,
+                "kanban_column.board_id": boardId,
+            })
+            .count("id")
+            .first();
+    } catch (error) {
+        console.log("Failed to get column count from db, err:", error);
+        throw new HTTP500Error("Failed to reorder columns");
+    }
+
+    if (!columnCount) {
+        throw new HTTP500Error("Failed to reorder columns");
+    } else if (columnCount.count !== columnIds.length) {
+        throw new HTTP401Error("Unauthorized");
+    }
+
+    // let updatedColumns = null;
+    try {
+        await db.transaction(async (trx) => {
+            const queries = columnIds.map((columnId, index) => {
+                return KanbanColumnModel(trx)
+                    .where({ id: columnId, board_id: boardId })
+                    .update({ position: index })
+                    .transacting(trx);
+            });
+
+            return Promise.all(queries);
+        });
+    } catch (error) {
+        console.log("Failed to reorder columns in db, err:", error);
+        throw new HTTP500Error("Failed to reorder columns");
+    }
+    // if (!updatedColumns) {
+    //     throw new HTTP500Error("Failed to reorder columns");
+    // }
+
+    let board = null;
+    try {
+        board = await GetKanbanBoardWithColumnsAndCards(boardId, profileId);
+    } catch (error) {
+        console.log("Failed to get board from db, err:", error);
+        throw new HTTP500Error("Order updated, but failed to fetch board");
+    }
+    if (!board) {
+        throw new HTTP500Error("Order updated, but failed to fetch board");
+    }
+
+    return board;
+}
+
+/**
  * @typedef {Object} CreateBoard
  * @property {string} title
  * @property {string} description

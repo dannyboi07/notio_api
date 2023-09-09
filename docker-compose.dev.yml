@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  app:
+    image: notio_app_dev
+    restart: always
+    build:
+      context: .
+      dockerfile: docker/app_dev.dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - 8080:8080
+    environment:
+      - DB_HOST=db
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_PASSWORD=${DB_PW}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - ${DB_PORT}:5432
+    volumes:
+      - ./docker/postgres-data:/var/lib/postgresql/data
+
+  # app:
+  #   image: notio_app
+  #   build:
+  #     context: .
+  #     dockerfile: docker/app.dockerfile
+  #   ports:
+  #     - ${PORT}:${PORT}
+  #   environment:
+  #     - DB_HOST=db
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - db

@@ -13,6 +13,7 @@ const {
     GetCreateKanbanCardResponse,
     UpdateKanbanBoard,
     GetKanbanBoardWithoutColumnResponse,
+	ReorderColumnsRequest,
 } = require("../schema/kanban");
 const { HTTP400Error } = require("../common/exceptions");
 
@@ -189,6 +190,40 @@ router.put(
         }
     },
 );
+
+router.put(
+	"/:boardId/column/reorder",
+	AuthMiddleware,
+	InputValidation(ReorderColumnsRequest),
+	async (req, res) => {
+		try {
+			let boardId = null;
+			try {
+				boardId = parseInt(req.params.boardId, 10);
+			} catch (error) {
+				throw new HTTP400Error("Invalid board id");
+			}
+
+			const updatedBoard = await KanbanService.UpdateKanbanBoard(
+				{
+					id: boardId,
+					...req.body,
+				},
+				req.userDetails.id,
+			);
+			return res.json({
+				status: "success",
+				message: "Kanban board updated successfully",
+				data: GetKanbanBoardWithoutColumnResponse(updatedBoard),
+			});
+		} catch (error) {
+			return res.status(error.statusCode).json({
+				status: error.status,
+				message: error.message,
+			});
+		}
+	}
+)
 
 module.exports = {
     router,
