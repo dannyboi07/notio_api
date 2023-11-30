@@ -1,5 +1,12 @@
-const { HTTP400Error, HTTP401Error } = require("../common/exceptions");
+const {
+    HTTP400Error,
+    HTTP401Error,
+    HTTP403Error,
+    HTTP404Error,
+    HTTP500Error,
+} = require("../common/exceptions");
 const ProfileService = require("../service/profile");
+const Joi = require("joi");
 
 function log(req, res, next) {
     console.log(`${req.method} ${req.url}`);
@@ -12,6 +19,10 @@ const joiValidationOptions = {
     stripUnknown: true,
 };
 
+/**
+ * @param {Joi.ObjectSchema} joiObject
+ * @param {(HTTP400Error |  HTTP401Error |  HTTP403Error |  HTTP404Error |  HTTP500Error)} ErrorResponse
+ */
 function InputValidation(joiObject, ErrorResponse = HTTP400Error) {
     return function (req, res, next) {
         const { error, value } = joiObject.validate(
