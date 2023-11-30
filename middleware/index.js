@@ -68,11 +68,12 @@ async function AuthMiddleware(req, res, next) {
     } catch (err) {
         console.error(err);
 
-        if (err.name === "TokenExpiredError") {
-            throw new HTTP401Error("Session expired");
-        } else if (err.name === "JsonWebTokenError") {
-            throw new HTTP401Error("Session expired");
-        }
+        // if (err.name === "TokenExpiredError") {
+        //     throw new HTTP401Error("Session expired");
+        // } else if (err.name === "JsonWebTokenError") {
+        //     throw new HTTP401Error("Session expired");
+        // }
+		throw new HTTP401Error("Session expired");
     }
 
     if (!profile) {
