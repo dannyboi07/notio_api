@@ -2,10 +2,10 @@
   "name": "notio_api",
   "version": "1.0.0",
   "description": "Backend API service for Notio",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "nodemon app.js",
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "jest"
   },
   "repository": {
@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "jest": "^29.7.0",
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "supertest": "^6.3.3"
   }
 }
