@@ -2,10 +2,6 @@ const router = require("express").Router();
 const mountUri = "/health";
 
 router.get("/", (req, res) => {
-    // res.status(200).json({
-    //     status: "ok",
-    //     message: "f",
-    // });
     res.status(200).send("OK");
 });
 
