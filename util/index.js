@@ -1,10 +1,11 @@
 /**
  * @param {any} value
- * @returns {[number, boolean]}
+ * @returns {[number | null, boolean]}
  */
 function parseInteger(value) {
     const parsed = parseInt(value, 10);
-    return [parsed, isNaN(parsed) && parsed.toString() === value];
+    const isValid = !isNaN(parsed) && parsed.toString() === value;
+    return [isValid ? parsed : null, isValid];
 }
 
-export { parseInteger };
+module.exports = { parseInteger };
