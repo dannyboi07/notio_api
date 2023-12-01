@@ -1,20 +1,29 @@
-const { Knex } = require("knex");
-const config = require("../config");
+const Knex = require("knex");
 
-/**
- * @type {Knex}
- */
-const db = require("knex")({
-    client: "pg",
-    version: "15.3",
-    connection: {
-        host: config.DB.HOST,
-        port: config.DB.PORT,
-        user: config.DB.USER,
-        password: config.DB.PW,
-        database: config.DB.NAME,
-        ssl: false
-    },
-});
+class Database {
+    /**
+     * @type {Knex.Knex}
+     */
+    #db;
 
-module.exports = db;
+    constructor(host, port, username, password, database, ssl = false) {
+        this.#db = new Knex({
+            client: "pg",
+            version: "15.3",
+            connection: {
+                host: host,
+                port: port,
+                user: username,
+                password: password,
+                database: database,
+                ssl: ssl,
+            },
+        });
+    }
+
+    get instance() {
+        return this.#db;
+    }
+}
+
+module.exports = Database;
