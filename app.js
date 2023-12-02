@@ -1,32 +1,14 @@
 const express = require("express");
 require("express-async-errors");
 const cors = require("cors");
-const middleware = require("./middleware");
 const cookieParser = require("cookie-parser");
 
-const healthController = require("./controller/health");
-const authController = require("./controller/auth");
-const kanbanController = require("./controller/kanban");
 const Config = require("./config");
 const Database = require("./db");
-
-// app.use(
-//     cors({
-//         origin: "http://localhost:3000",
-//         credentials: true,
-//     }),
-// );
-
-// app.use(express.json());
-// app.use(middleware.log);
-
-// app.use(`${config.BASE}${healthController.mountUri}`, healthController.router);
-
-// app.use(cookieParser());
-// app.use(`${config.BASE}${kanbanController.mountUri}`, kanbanController.router);
-// app.use(`${config.BASE}${authController.mountUri}`, authController.router);
-
-// app.use(middleware.GlobalErrorHandler);
+const HealthRoutes = require("./routes/health");
+const AuthRoutes = require("./routes/auth");
+const RequestLogger = require("./middleware/log");
+const GlobalErrorHandlerMiddleware = require("./middleware/error_handler");
 
 class Application {
     /**
@@ -89,24 +71,20 @@ class Application {
         );
 
         this.#app.use(express.json());
-        this.#app.use(middleware.log);
+        this.#app.use(RequestLogger);
 
         this.#app.use(
-            `${this.#config.BASE}${healthController.mountUri}`,
-            healthController.router,
+            `${this.#config.BASE}${HealthRoutes.mountUri}`,
+            new HealthRoutes().router,
         );
 
-        // this.#app.use(cookieParser());
-        // this.#app.use(
-        //     `${this.#config.BASE}${kanbanController.mountUri}`,
-        //     kanbanController.router,
-        // );
-        // this.#app.use(
-        //     `${this.#config.BASE}${authController.mountUri}`,
-        //     authController.router,
-        // );
+        this.#app.use(cookieParser());
+        this.#app.use(
+            `${this.#config.BASE}${AuthRoutes.mountUri}`,
+            new AuthRoutes(this).router,
+        );
 
-        this.#app.use(middleware.GlobalErrorHandler);
+        this.#app.use(GlobalErrorHandlerMiddleware);
     }
 
     start() {
