@@ -17,13 +17,13 @@ const {
 } = require("../common/exceptions");
 
 class AuthController {
-    #app;
+    #service;
 
     /**
      * @param {Application} app
      */
     constructor(app) {
-        this.#app = app;
+        this.#service = new ProfileService(app);
         // Binding methods to this instance, otherwise their scope is the global scope,
         // some weird JS stuff (Why isn't this behaviour in other classes?)
         this.RegisterUser = this.RegisterUser.bind(this);
@@ -39,9 +39,7 @@ class AuthController {
      */
     async RegisterUser(req, res) {
         try {
-            const createdProfile = await new ProfileService(
-                this.#app,
-            ).CreateProfile(
+            const createdProfile = await this.#service.CreateProfile(
                 req.body?.email,
                 req.body?.username,
                 req.body?.password,
@@ -68,9 +66,10 @@ class AuthController {
      */
     async LoginUser(req, res) {
         try {
-            const { profile, tokens } = await new ProfileService(
-                this.#app,
-            ).LoginUser(req.body?.username, req.body?.password);
+            const { profile, tokens } = await this.#service.LoginUser(
+                req.body?.username,
+                req.body?.password,
+            );
             for (const token of tokens) {
                 res.cookie(token.name, token.token, {
                     maxAge: token.expiresIn * 1000,
@@ -99,9 +98,9 @@ class AuthController {
      */
     async LogoutUser(req, res) {
         try {
-            const tokensToDelete = await new ProfileService(
-                this.#app,
-            ).LogoutUser(req.userDetails.id);
+            const tokensToDelete = await this.#service.LogoutUser(
+                req.userDetails.id,
+            );
             for (const token of tokensToDelete) {
                 [
                     res.clearCookie(token.name, {
@@ -126,9 +125,9 @@ class AuthController {
     async RefreshAccessToken(req, res) {
         try {
             const refreshToken = req.cookies?.refreshToken ?? "";
-            const accessToken = await new ProfileService(
-                this.#app,
-            ).RefreshAccessToken(refreshToken);
+            const accessToken = await this.#service.RefreshAccessToken(
+                refreshToken,
+            );
 
             res.cookie(accessToken.name, accessToken.token, {
                 maxAge: accessToken.expiresIn * 1000,
