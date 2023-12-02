@@ -79,17 +79,18 @@ class Application {
         );
 
         this.#app.use(cookieParser());
+        const authRoutes = new AuthRoutes(this);
         this.#app.use(
-            `${this.#config.BASE}${AuthRoutes.mountUri}`,
-            new AuthRoutes(this).router,
+            `${this.#config.BASE}${authRoutes.mountUri}`,
+            authRoutes.router,
         );
 
         this.#app.use(GlobalErrorHandlerMiddleware);
     }
 
     start() {
-        this.#app.listen(this.config.PORT, () => {
-            console.log(`Server started on port ${this.config.PORT}`);
+        this.#app.listen(this.#config.PORT, () => {
+            console.log(`Server started on port ${this.#config.PORT}`);
         });
     }
 
