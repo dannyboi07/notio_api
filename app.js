@@ -32,7 +32,7 @@ class Application {
     constructor() {
         this.#app = express();
         try {
-            this.#config = new Config(process.env);
+            this.#config = new Config();
         } catch (error) {
             console.error(error);
             console.log("Exiting...");
@@ -113,6 +113,10 @@ class Application {
      */
     get db() {
         return this.#db;
+    }
+
+    get enviroments() {
+        return Application.enviroments;
     }
 }
 

@@ -1,4 +1,5 @@
-require("dotenv").config();
+const path = require("path");
+const { config: dotenvConfig } = require("dotenv");
 const { parseInteger } = require("../util");
 
 class ConfigException extends Error {
@@ -23,7 +24,13 @@ class Config {
     #ACCESS_TOKEN_SECRET;
     #REFRESH_TOKEN_SECRET;
 
-    constructor(config = {}) {
+    constructor(envpath = "../.env") {
+        const { parsed: config, error } = dotenvConfig({
+            path: path.resolve(__dirname, envpath),
+        });
+        if (error) {
+            throw new ConfigException(error.message);
+        }
         this.#ENV = config.ENV;
         this.#HOST = config.HOST;
         const [PORT, portIsNum] = parseInteger(config.PORT);
