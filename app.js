@@ -23,11 +23,6 @@ class Application {
      * @type {Database}
      */
     #db;
-    static enviroments = {
-        DEV: "development",
-        PROD: "production",
-        TEST: "test",
-    };
 
     constructor() {
         this.#app = express();
@@ -40,7 +35,7 @@ class Application {
         }
 
         if (
-            Object.values(Application.enviroments).some(
+            Object.values(Config.environments).some(
                 (env) => env === this.#config.ENV,
             ) === false
         ) {
@@ -63,7 +58,7 @@ class Application {
         this.#app.use(
             cors({
                 origin:
-                    this.#config.ENV === Application.enviroments.PROD
+                    this.#config.ENV === Config.environments.PROD
                         ? this.#config.HOST
                         : `http://localhost:${this.#config.PORT}`,
                 credentials: true,
@@ -79,6 +74,13 @@ class Application {
         );
 
         this.#app.use(cookieParser());
+
+        const kanbanRoutes = new KanbanRoutes(this);
+        this.#app.use(
+            `${this.#config.BASE}${kanbanRoutes.mountUri}`,
+            kanbanRoutes.router,
+        );
+
         const authRoutes = new AuthRoutes(this);
         this.#app.use(
             `${this.#config.BASE}${authRoutes.mountUri}`,
@@ -113,10 +115,6 @@ class Application {
      */
     get db() {
         return this.#db;
-    }
-
-    get enviroments() {
-        return Application.enviroments;
     }
 }
 

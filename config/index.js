@@ -10,6 +10,11 @@ class ConfigException extends Error {
 }
 
 class Config {
+    static enviroment = {
+        DEV: "development",
+        TEST: "test",
+        PROD: "production",
+    };
     // All the properties are read-only
     #ENV;
     #HOST;

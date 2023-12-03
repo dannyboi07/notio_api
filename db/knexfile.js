@@ -1,4 +1,3 @@
-const Application = require("../app");
 const Config = require("../config");
 const { DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PW } = new Config();
 
@@ -6,7 +5,7 @@ const { DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PW } = new Config();
  * @type { Object.<string, import("knex").Knex.Config> }
  */
 module.exports = {
-    [Application.enviroments.DEV]: {
+    [Config.environments.DEV]: {
         client: "postgresql",
         connection: {
             host: DB_HOST,
@@ -24,7 +23,7 @@ module.exports = {
         },
     },
 
-    [Application.enviroments.PROD]: {
+    [Config.environments.PROD]: {
         client: "postgresql",
         connection: {
             host: DB_HOST,
