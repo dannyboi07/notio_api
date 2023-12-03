@@ -1,4 +1,5 @@
 const Database = require("../db");
+const { Knex } = require("knex");
 
 class ProfileModel {
     static tableName = "profile";
@@ -15,13 +16,19 @@ class ProfileModel {
     }
 
     /**
+     * @returns {Knex.QueryBuilder<Profile, {}>}
+     */
+    get #table() {
+        return this.#db.instance(ProfileModel.tableName);
+    }
+
+    /**
      * @param {string} email
      * @param {string} username
      * @returns {Promise<Profile>}
      */
-    async selectByEmailAndUsername(email, username) {
-        return await this.#db
-            .instance(ProfileModel.tableName)
+    async SelectByEmailAndUsername(email, username) {
+        return await this.#table
             .where({
                 email,
                 username,
@@ -33,9 +40,8 @@ class ProfileModel {
      * @param {string} username
      * @returns {Promise<Profile>}
      */
-    async selectByUsername(username) {
-        return await this.#db
-            .instance(ProfileModel.tableName)
+    async SelectByUsername(username) {
+        return await this.#table
             .where({
                 username,
             })
@@ -46,9 +52,8 @@ class ProfileModel {
      * @param {string} id
      * @returns {Promise<Profile>}
      */
-    async selectById(id) {
-        return await this.#db
-            .instance(ProfileModel.tableName)
+    async SelectById(id) {
+        return await this.#table
             .where({
                 id,
             })
@@ -62,9 +67,8 @@ class ProfileModel {
      * @param {string} first_name
      * @returns {Promise<Profile>}
      */
-    async insertProfile(email, username, password, first_name) {
-        const [profile] = await this.#db
-            .instance(ProfileModel.tableName)
+    async Insert(email, username, password, first_name) {
+        const [profile] = await this.#table
             .insert({
                 email,
                 username,

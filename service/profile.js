@@ -114,7 +114,7 @@ class ProfileService {
      * @returns {Promise<Profile>}
      */
     async GetProfileById(id) {
-        return new ProfileModel(this.#app.db).selectById(id);
+        return new ProfileModel(this.#app.db).SelectById(id);
     }
 
     /**
@@ -128,7 +128,7 @@ class ProfileService {
         let existingUser = null;
         const profileModel = new ProfileModel(this.#app.db);
         try {
-            existingUser = await profileModel.selectByEmailAndUsername(
+            existingUser = await profileModel.SelectByEmailAndUsername(
                 email,
                 username,
             );
@@ -157,7 +157,7 @@ class ProfileService {
 
         let createdProfile = null;
         try {
-            createdProfile = await profileModel.insertProfile(
+            createdProfile = await profileModel.Insert(
                 email,
                 username,
                 hashedPw,
@@ -184,7 +184,7 @@ class ProfileService {
     async LoginUser(username, password) {
         let userProfile = null;
         try {
-            userProfile = await new ProfileModel(this.#app.db).selectByUsername(
+            userProfile = await new ProfileModel(this.#app.db).SelectByUsername(
                 username,
             );
         } catch (error) {
