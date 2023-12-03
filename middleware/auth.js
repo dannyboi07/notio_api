@@ -4,41 +4,48 @@ const { ProfileService } = require("../service/profile");
 const { HTTP401Error, HTTP500Error } = require("../common/exceptions");
 
 /**
- * @param {express.Request} req
- * @param {express.Response} res
- * @param {express.NextFunction} next
- * @throws {HTTP401Error}
- * @returns {Promise<void>}
+ * @param {Application} app
  */
-async function AuthMiddleware(req, res, next) {
-    const accessToken = req.cookies?.accessToken ?? "";
+function AuthMiddleware(app) {
+    /**
+     * @param {express.Request} req
+     * @param {express.Response} res
+     * @param {express.NextFunction} next
+     * @throws {HTTP401Error}
+     * @returns {Promise<void>}
+     */
+    return async function (req, res, next) {
+        const accessToken = req.cookies?.accessToken ?? "";
 
-    if (!accessToken) {
-        throw new HTTP401Error("Missing access token");
-    }
+        if (!accessToken) {
+            throw new HTTP401Error("Missing access token");
+        }
 
-    let profile = null;
-    const profileService = new ProfileService(Application);
+        let profile = null;
+        const profileService = new ProfileService(app);
 
-    const [decodedAccessToken, isValid] =
-        profileService.VerifyAccessToken(accessToken);
-    if (!isValid) {
-        throw new HTTP401Error("Session expired");
-    }
+        const [decodedAccessToken, isValid] =
+            await profileService.VerifyAccessToken(accessToken);
+        if (!isValid) {
+            throw new HTTP401Error("Session expired");
+        }
 
-    try {
-        profile = await profileService.GetProfileById(decodedAccessToken.id);
-    } catch (err) {
-        console.error("AuthMiddleware:", err);
-        throw new HTTP500Error();
-    }
+        try {
+            profile = await profileService.GetProfileById(
+                decodedAccessToken.id,
+            );
+        } catch (err) {
+            console.error("AuthMiddleware:", err);
+            throw new HTTP500Error();
+        }
 
-    if (!profile) {
-        throw new HTTP401Error();
-    }
-    req.userDetails = profile;
+        if (!profile) {
+            throw new HTTP401Error();
+        }
+        req.userDetails = profile;
 
-    next();
+        next();
+    };
 }
 
 module.exports = AuthMiddleware;
