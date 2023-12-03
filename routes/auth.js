@@ -7,28 +7,34 @@ const AuthMiddleware = require("../middleware/auth");
 const { CreateProfile, LoginRequest } = require("../schema/profile");
 
 class AuthRoutes extends BaseRoutes {
-    #controller;
-
     /**
      * @param {Application} app
      */
     constructor(app) {
-        super(app, "/auth");
-        this.#controller = new AuthController(this.app);
+        super("/auth");
+        const authController = new AuthController(app);
 
         this.router.post(
             "/register",
             ValidationMiddleware(CreateProfile),
-            this.#controller.RegisterUser,
+            authController.RegisterUser,
         );
         this.router.post(
             "/login",
             ValidationMiddleware(LoginRequest),
-            this.#controller.LoginUser,
+            authController.LoginUser,
         );
-        this.router.get("/logout", AuthMiddleware, this.#controller.LogoutUser);
-        this.router.get("/refresh", this.#controller.RefreshAccessToken);
-        this.router.get("/me", AuthMiddleware, this.#controller.GetMyProfile);
+        this.router.get(
+            "/logout",
+            AuthMiddleware(app),
+            authController.LogoutUser,
+        );
+        this.router.get("/refresh", authController.RefreshAccessToken);
+        this.router.get(
+            "/me",
+            AuthMiddleware(app),
+            authController.GetMyProfile,
+        );
     }
 }
 
