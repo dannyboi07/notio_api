@@ -10,7 +10,7 @@ class ConfigException extends Error {
 }
 
 class Config {
-    static enviroment = {
+    static environments = {
         DEV: "development",
         TEST: "test",
         PROD: "production",
