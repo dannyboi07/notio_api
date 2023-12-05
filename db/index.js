@@ -24,6 +24,13 @@ class Database {
     get instance() {
         return this.#db;
     }
+
+    /**
+     * @returns {boolean}
+     */
+    IsUniqueError(err) {
+        return err.code === "23505";
+    }
 }
 
 module.exports = Database;
