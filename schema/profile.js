@@ -20,6 +20,7 @@ const CreateProfile = Joi.object({
             "string.max": getStringMaxLen("Username"),
             "string.alphanum": getStringMustBeAlphaNum("Username"),
         }),
+    // TODO: Change min len to 8
     password: Joi.string()
         .min(3)
         .max(30)
