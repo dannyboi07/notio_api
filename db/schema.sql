@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS profile (
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (username, email),
+	INDEX (username),
+	INDEX (email),
     CHECK (first_name <> ''),
     CHECK (username <> ''),
     CHECK (email <> ''),
@@ -25,7 +27,8 @@ CREATE TABLE IF NOT EXISTS kanban_board (
 	description VARCHAR(255),
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-	FOREIGN KEY (profile_id) REFERENCES profile(id)
+	FOREIGN KEY (profile_id) REFERENCES profile(id),
+	INDEX (profile_id)
 );
 
 CREATE TABLE IF NOT EXISTS kanban_column (
@@ -37,7 +40,8 @@ CREATE TABLE IF NOT EXISTS kanban_column (
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY (board_id) REFERENCES kanban_board(id),
-	UNIQUE (board_id, position)
+	UNIQUE (board_id, position),
+	INDEX (board_id)
 );
 
 CREATE TABLE IF NOT EXISTS kanban_card (
@@ -49,5 +53,6 @@ CREATE TABLE IF NOT EXISTS kanban_card (
 	created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	FOREIGN KEY (column_id) REFERENCES kanban_column(id),
-	UNIQUE (column_id, position)
+	UNIQUE (column_id, position),
+	INDEX (column_id)
 );

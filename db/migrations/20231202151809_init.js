@@ -13,6 +13,7 @@ exports.up = function (knex) {
             table.string("password", 255).notNullable();
             table.timestamps(true, true);
             table.unique(["username", "email"]);
+            table.index(["username", "email"]);
             table.check("first_name <> ''");
             table.check("username <> ''");
             table.check("email <> ''");
@@ -25,6 +26,7 @@ exports.up = function (knex) {
             table.string("description", 255);
             table.timestamps(true, true);
             table.foreign("profile_id").references("profile.id");
+            table.index(["profile_id"]);
         })
         .createTable("kanban_column", (table) => {
             table.increments("id").primary();
@@ -35,6 +37,7 @@ exports.up = function (knex) {
             table.timestamps(true, true);
             table.foreign("board_id").references("kanban_board.id");
             table.unique(["board_id", "position"]);
+            table.index(["board_id"]);
         })
         .createTable("kanban_card", (table) => {
             table.increments("id").primary();
@@ -45,6 +48,7 @@ exports.up = function (knex) {
             table.timestamps(true, true);
             table.foreign("column_id").references("kanban_column.id");
             table.unique(["column_id", "position"]);
+            table.index(["column_id"]);
         })
         .then(() => {
             console.log("Migration complete");
