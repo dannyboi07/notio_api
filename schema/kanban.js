@@ -109,6 +109,15 @@ const GetKanbanBoardColumnResponse = (kanbanBoardColumn) => ({
 });
 
 /**
+ * @param {KanbanColumn[]} kanbanBoardColumns
+ * @returns {KanbanColumn[]}
+ */
+const GetManyKanbanBoardColumnsResponse = (kanbanBoardColumns) =>
+    kanbanBoardColumns.map((kanbanBoardColumn) =>
+        GetKanbanBoardColumnResponse(kanbanBoardColumn),
+    );
+
+/**
  * @param {KanbanColumn} createdKanbanBoardColumn
  * @returns {KanbanColumn}
  */
@@ -188,6 +197,23 @@ const UpdateKanbanBoard = Joi.object({
         }),
 });
 
+const ReorderColumnsRequest = Joi.object({
+    column_ids: Joi.array()
+        .items(
+            Joi.number()
+                .required()
+                .messages({
+                    "any.required": getStringRequired("Column id"),
+                    "number.base": getStringRequired("Column id"),
+                }),
+        )
+        .required()
+        .messages({
+            "any.required": getStringRequired("Columns"),
+            "array.base": getStringRequired("Columns"),
+        }),
+});
+
 module.exports = {
     CreateKanbanBoard,
     GetCreateKanbanResponse,
@@ -196,9 +222,11 @@ module.exports = {
     GetManyKanbanBoardsResponse,
     CreateKanbanBoardColumn,
     GetKanbanBoardColumnResponse,
+    GetManyKanbanBoardColumnsResponse,
     GetCreateKanbanBoardColumnResponse,
     CreateKanbanCard,
     GetKanbanCardResponse,
     GetCreateKanbanCardResponse,
     UpdateKanbanBoard,
+    ReorderColumnsRequest,
 };

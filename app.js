@@ -5,9 +5,13 @@ const cookieParser = require("cookie-parser");
 
 const Config = require("./config");
 const Database = require("./db");
+
+const RequestLogger = require("./middleware/log");
+
 const HealthRoutes = require("./routes/health");
 const AuthRoutes = require("./routes/auth");
-const RequestLogger = require("./middleware/log");
+const KanbanRoutes = require("./routes/kanban");
+
 const GlobalErrorHandlerMiddleware = require("./middleware/error_handler");
 
 class Application {
