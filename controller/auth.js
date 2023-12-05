@@ -134,7 +134,7 @@ class AuthController {
                 path: accessToken.path,
                 httpOnly: true,
             });
-            res.status(200).json({
+            return res.status(200).json({
                 status: "success",
             });
         } catch (error) {
